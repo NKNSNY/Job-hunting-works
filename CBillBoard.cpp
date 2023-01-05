@@ -141,7 +141,7 @@ void CBillBoard::CalcBillBoardMatrix(const DirectX::XMFLOAT4X4 & cameramat)
 void CBillBoard::Draw()
 {
     // Ｚバッファ無効化
-   // TurnOffZbuffer();
+    //TurnOffZbuffer();
 
     ID3D11DeviceContext * devcontext;
 
@@ -160,7 +160,7 @@ void CBillBoard::Draw()
     // 頂点バッファをセット
     devcontext->IASetVertexBuffers(0 , 1 , &m_vbuffer , &stride , &offset);
     // インデックスバッファをセット
-//	m_devcontext->IASetIndexBuffer(nullptr, DXGI_FORMAT_R32_UINT, 0);
+//devcontext->IASetIndexBuffer(nullptr, DXGI_FORMAT_R32_UINT, 0);
     // トポロジーをセット
     devcontext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 

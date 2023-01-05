@@ -3,6 +3,7 @@
 
 #include "CDirectInput.h"
 #include "stage.h"
+#include "fade.h"
 
 int Stage::m_stage [20][7][7] {};
 int Stage::m_stage_width {};
@@ -81,7 +82,7 @@ bool Stage::Init(int stage_width , int stage_hight , int fall_time , int surviva
     m_create_bottom = 0;
     m_stage_color = 2;
     m_stage_color_reset_flg = false;
-    m_next_add_score = 40;
+    m_next_add_score = 120;
     m_now_add_score = 10;
 
     return true;
@@ -340,6 +341,8 @@ ReturnUI Stage::ChangeColor(DirectX::XMFLOAT3 stage_player_pos)
         }
         m_stage_color = 2;
         m_stage_color_reset_flg = false;
+        m_now_add_score = 10;
+        m_next_add_score = 120;
     }
 
     if (m_stage [(int) stage_player_pos.y][(int) stage_player_pos.z][(int) stage_player_pos.x] == 1)
@@ -382,6 +385,9 @@ ReturnUI Stage::ChangeColor(DirectX::XMFLOAT3 stage_player_pos)
                 }
                 m_stage_color++;
                 m_stage_color_flg_x [i][y] = true;
+                m_now_add_score = m_now_add_score * 2;
+                return_num.color_change_score += m_next_add_score;
+                m_next_add_score = m_next_add_score * 2;
             }
             stage_color_num = 0;
         }
@@ -412,11 +418,17 @@ ReturnUI Stage::ChangeColor(DirectX::XMFLOAT3 stage_player_pos)
                 }
                 m_stage_color++;
                 m_stage_color_flg_y [i][y] = true;
+                m_now_add_score = m_now_add_score * 2;
+                return_num.color_change_score += m_next_add_score;
+                m_next_add_score = m_next_add_score * 2;
             }
             stage_color_num = 0;
         }
+    }
 
-
+    if (return_num.stage_score != 0 && return_num.stage_score != m_now_add_score)
+    {
+        return_num.stage_score = m_now_add_score;
     }
 
     return return_num;

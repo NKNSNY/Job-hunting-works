@@ -73,6 +73,9 @@ public:
     // ステージが登れるかどうかセット
     void SetClimbFlg(int y , int x , bool fall_flg);
 
+    // プレイヤーの41 , 42 , 43を返す
+    DirectX::XMFLOAT3 GetPlayerPos();
+
     PlayerAnimation m_player_anim;          // プレイヤーのアニメーション関連
 
     PlayerChip m_player_chip;                  // プレイヤーがどこにいるか

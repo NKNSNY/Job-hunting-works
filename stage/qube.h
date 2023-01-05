@@ -21,6 +21,7 @@ public:
     bool Init(int qube_type_num);
     bool Update();
     bool Draw();
+    bool Draw(int not_billboard_draw);    // キューブだけ描画
     void Finalize();
 
     // プレイヤーに踏まれたところの色を変える
@@ -34,6 +35,8 @@ public:
     bool SetPos(DirectX::XMFLOAT3 pos);
     // 落下距離、生存時間、落下速度の変化幅
     bool SetFall(int fall_distance , int survival_time , int fall_speed);
+    // 回転する
+    bool SetRot(DirectX::XMFLOAT3 rot);
 
     int m_fall_distance;               // 落下距離
     int m_survival_time;              // 残っている時間

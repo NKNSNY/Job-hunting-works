@@ -77,12 +77,16 @@ public:
 
 	// 位置をセット
 	void SetPosition(float x, float y, float z);
+	void SetPosition(DirectX::XMFLOAT3 xyz);
 
 	// UVをセット
 	void SetUV(DirectX::XMFLOAT2 * texture_uv);
 
 	// Z軸回転
 	void SetRotation(float angle);
+
+	// 色をセット
+	void SetColor(DirectX::XMFLOAT4 color);
 
 	// 矩形の進行方向を取得（元画像が上向きに作られていることを前提）
 	DirectX::XMFLOAT3 GetForward() {
@@ -100,6 +104,16 @@ public:
 		side.y = m_worldmtx._12;
 		side.z = m_worldmtx._13;
 		return side;
+	}
+
+	// 矩形の位置を取得
+	DirectX::XMFLOAT3 GetPostion()
+	{
+		DirectX::XMFLOAT3 pos {};
+		pos.x = m_worldmtx._41;
+		pos.y = m_worldmtx._42;
+		pos.z = m_worldmtx._43;
+		return pos;
 	}
 
 	// 頂点データ更新

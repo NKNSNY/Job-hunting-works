@@ -13,5 +13,5 @@ float4 main(VS_OUTPUT input) : SV_Target
 	col = texcol;
 	col = texcol * input.Color;
 	col.a = input.Color.a*texcol.a;
-    return col;
+	return col;
 }

@@ -178,6 +178,13 @@ void Quad2D::SetPosition(float x , float y , float z)
     m_worldmtx._43 = z;
 }
 
+void Quad2D::SetPosition(DirectX::XMFLOAT3 xyz)
+{
+    m_worldmtx._41 = xyz.x;
+    m_worldmtx._42 = xyz.y;
+    m_worldmtx._43 = xyz.z;
+}
+
 void Quad2D::SetUV(XMFLOAT2 * texture_uv)
 {
     for (int i = 0; i < 4; i++)
@@ -190,6 +197,14 @@ void Quad2D::SetUV(XMFLOAT2 * texture_uv)
 void Quad2D::SetRotation(float angle)
 {
     DX11MtxRotationZ(angle , m_worldmtx);
+}
+
+void Quad2D::SetColor(DirectX::XMFLOAT4 color)
+{
+    for (int i = 0; i < 4; i++)
+    {
+        m_vertex [i].color = color;
+    }
 }
 
 // 頂点データ更新
@@ -338,6 +353,13 @@ void Quad2D::ChangeNumberUV(int uv_num)
             m_vertex [3].tex = { 0.75f,1.0f };
             break;
         case 9:
+            m_vertex [0].tex = { 0.8f,0.58f };
+            m_vertex [1].tex = { 0.95f,0.58f };
+            m_vertex [2].tex = { 0.8f,1.0f };
+            m_vertex [3].tex = { 0.95f,1.0f };
+            break;
+
+        default:
             m_vertex [0].tex = { 0.8f,0.58f };
             m_vertex [1].tex = { 0.95f,0.58f };
             m_vertex [2].tex = { 0.8f,1.0f };

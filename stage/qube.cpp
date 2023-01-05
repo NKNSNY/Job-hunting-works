@@ -139,6 +139,13 @@ bool Qube::Draw()
     return true;
 }
 
+bool Qube::Draw(int not_billboard_draw)
+{
+    m_model->Draw(m_mtx);
+
+    return true;
+}
+
 void Qube::Finalize()
 {
 }
@@ -248,6 +255,17 @@ bool Qube::SetFall(int fall_distance , int survival_time , int fall_speed)
     m_fall_speed = fall_speed;
     m_first_survival_time = survival_time;
     m_first_fall_distance = fall_distance;
+
+    return true;
+}
+
+bool Qube::SetRot(DirectX::XMFLOAT3 rot)
+{
+    XMFLOAT4X4 mtx {};
+    XMFLOAT3 pos {};
+
+    DX11MakeWorldMatrix(mtx , rot , pos);
+    DX11MtxMultiply(m_mtx , mtx , m_mtx);
 
     return true;
 }

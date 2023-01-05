@@ -58,6 +58,9 @@
     <Filter Include="ソース ファイル\game\gemaobject\stage">
       <UniqueIdentifier>{4567d414-a6f5-49fa-a04a-cb80cf04b663}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\game\UI">
+      <UniqueIdentifier>{e3002dbf-76c7-43f6-9059-82a6026306ea}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp">
@@ -177,7 +180,19 @@
     <ClCompile Include="player\player_chip.cpp">
       <Filter>ソース ファイル\game\gemaobject\player</Filter>
     </ClCompile>
+    <ClCompile Include="number_billboard.cpp">
+      <Filter>ソース ファイル\game\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="title.cpp">
+      <Filter>ソース ファイル\game</Filter>
+    </ClCompile>
+    <ClCompile Include="dx11_init.cpp">
+      <Filter>ソース ファイル\system</Filter>
+    </ClCompile>
     <ClCompile Include="quad2d.cpp">
+      <Filter>ソース ファイル\game\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="fade.cpp">
       <Filter>ソース ファイル\game</Filter>
     </ClCompile>
   </ItemGroup>
@@ -323,7 +338,19 @@
     <ClInclude Include="player\player_chip.h">
       <Filter>ソース ファイル\game\gemaobject\player</Filter>
     </ClInclude>
+    <ClInclude Include="number_billboard.h">
+      <Filter>ソース ファイル\game\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="title.h">
+      <Filter>ソース ファイル\game</Filter>
+    </ClInclude>
+    <ClInclude Include="dx11_init.h">
+      <Filter>ソース ファイル\system</Filter>
+    </ClInclude>
     <ClInclude Include="quad2d.h">
+      <Filter>ソース ファイル\game\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="fade.h">
       <Filter>ソース ファイル\game</Filter>
     </ClInclude>
   </ItemGroup>

@@ -249,6 +249,16 @@ void Player::SetClimbFlg(int y , int x , bool fall_flg)
     m_player_climb_flg5 [y][x] = fall_flg;
 }
 
+XMFLOAT3 Player::GetPlayerPos()
+{
+    XMFLOAT3 pos {};
+    pos.x = m_mtxlocalpose [0]._41;
+    pos.y = m_mtxlocalpose [0]._42;
+    pos.z = m_mtxlocalpose [0]._43;
+
+    return pos;
+}
+
 void Player::UpdateLocalpose()
 {
     // 各パーツの回転角度(前フレームからの変位量)

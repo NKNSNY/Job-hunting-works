@@ -8,6 +8,7 @@ struct ReturnUI
 {
     int player_hp;
     int stage_score;
+    int color_change_score;
 };
 
 class Stage

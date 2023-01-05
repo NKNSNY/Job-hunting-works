@@ -1,5 +1,4 @@
 #include <stdlib.h>
-#include <time.h>
 #include <cinttypes>
 #include "dx11util.h"
 #include "CModel.h"
@@ -15,8 +14,8 @@
 #include "StageHit.h"
 #include "player/player.h"
 #include "stage/stage.h"
-#include "TextureMgr.h"
 #include "quad2d.h"
+#include "number_billboard.h"
 
 constexpr int stage_qube_num = 5;
 constexpr int player_y = 1;
@@ -30,19 +29,10 @@ int score_num [6];
 Quad2D UI_HP;
 Quad2D UI_score;
 Quad2D UI_score_num [6];
-
+Num_Billboard billboard_score;
 
 void GameInit()
 {
-    srand((unsigned int) time(NULL));
-
-    // DX11初期化
-    DX11Init(
-        Application::Instance()->GetHWnd() ,
-        Application::CLIENT_WIDTH ,
-        Application::CLIENT_HEIGHT ,
-        false);
-
     // カメラの位置と注視点をセット（正方形の中心を見る）
     CCamera::GetInstance()->m_camera_eye = { ((float) stage_qube_num - 1.0f) * 10.0f , 180.0f + (player_y + 20.0f) ,
         (float) stage_qube_num * -50 };
@@ -69,19 +59,8 @@ void GameInit()
     DX11LightInit(
         DirectX::XMFLOAT4(1 , 1 , -1 , 0));
 
-    // アルファブレンド有効化
-    TurnOnAlphablend();
 
-    // DirectT INPUT 初期化
-    CDirectInput::GetInstance().Init(
-        Application::Instance()->GetHInst() ,
-        Application::Instance()->GetHWnd() ,
-        Application::CLIENT_WIDTH ,
-        Application::CLIENT_HEIGHT);
-
-    TextureMgr::TextureLoad();
-
-    Stage::Init(stage_qube_num , 5 , 1000 , 2000 , 3);
+    Stage::Init(stage_qube_num , 5 , 1000 , 1500 , 5);
 
     g_player.Init(stage_qube_num , player_y);
 
@@ -112,12 +91,7 @@ void GameInit()
         UI_score_num [i].SetPosition(1200.0f - (i * 30) , 120.0f , 0.0f);
     }
 
-    UI_score_num [0].ChangeNumberUV(3);
-    UI_score_num [1].ChangeNumberUV(0);
-    UI_score_num [2].ChangeNumberUV(6);
-    UI_score_num [3].ChangeNumberUV(7);
-    UI_score_num [4].ChangeNumberUV(8);
-    UI_score_num [5].ChangeNumberUV(9);
+    billboard_score.Init();
 
 }
 
@@ -177,6 +151,7 @@ void GameUpdate(uint64_t dt)
 
     g_player.m_player_hp += ui_num.player_hp;
     score += ui_num.stage_score;
+    score += ui_num.color_change_score;
 
     pos.y++;
 
@@ -207,16 +182,26 @@ void GameUpdate(uint64_t dt)
     UI_HP.SetPosition(40.0f , 100.0f + (100.0f - (g_player.m_player_hp / 100.0f)) , 0.0f);
     UI_HP.updateVbuffer();
 
-    //score_num [0] = score % 10;
-    //score_num [1] = (score % 100) / 10;
-    //score_num [2] = (score % 1000) / 100;
-    //score_num [3] = (score % 10000) / 1000;
-    //score_num [4] = (score % 100000) / 10000;
-    //score_num [5] = (score % 1000000) / 100000;
+    score_num [0] = score % 10;
+    score_num [1] = (score % 100) / 10;
+    score_num [2] = (score % 1000) / 100;
+    score_num [3] = (score % 10000) / 1000;
+    score_num [4] = (score % 100000) / 10000;
+    score_num [5] = (score % 1000000) / 100000;
 
     for (int i = 0; i < 6; i++)
     {
+        UI_score_num [i].ChangeNumberUV(score_num [i]);
         UI_score_num [i].updateVbuffer();
+    }
+
+    if (ui_num.color_change_score != 0)
+    {
+        billboard_score.Update(pos , CCamera::GetInstance()->m_camera_pos , ui_num.color_change_score);
+    }
+    else if (ui_num.stage_score != 0)
+    {
+        billboard_score.Update(pos , CCamera::GetInstance()->m_camera_pos , ui_num.stage_score);
     }
 
 }
@@ -258,6 +243,8 @@ void GameRender(uint64_t dt)
         UI_score_num [i].Draw();
     }
 
+    billboard_score.Draw();
+
     // 描画後処理
     DX11AfterRender();
 }
@@ -267,5 +254,5 @@ void GameDispose()
 
     ModelMgr::GetInstance().Finalize();
 
-    DX11Uninit();
+    //DX11Uninit();
 }

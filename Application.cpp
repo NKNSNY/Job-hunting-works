@@ -15,13 +15,16 @@
 #include "Application.h"
 #include "CWindow.h"
 #include "macro.h"
+#include "dx11_init.h"
 #include "game.h"
+#include "title.h"
+#include "fade.h"
 
 //-----------------------------------------------------------------------------
 // スタティック　メンバー
 //-----------------------------------------------------------------------------
-const char*			Application::WINDOW_TITLE = "神は細部に宿る";
-const char*			Application::WINDOW_CLASS_NAME = "win32app";
+const char * Application::WINDOW_TITLE = "神は細部に宿る";
+const char * Application::WINDOW_CLASS_NAME = "win32app";
 
 const uint32_t		Application::WINDOW_STYLE_WINDOWED = (WS_VISIBLE | WS_CAPTION | WS_SYSMENU);
 const uint32_t		Application::WINDOW_EX_STYLE_WINDOWED = (0);
@@ -36,14 +39,27 @@ uint32_t			Application::SYSTEM_HEIGHT = 0;
 
 const float			Application::FPS = 60;
 
+enum AppState
+{
+    TITLE_INIT ,
+    TITLE ,
+    GAME_INIT ,
+    GAME ,
+    RESULT_INT ,
+    RESULT ,
+};
+
+AppState app_state;
+
 //==============================================================================
 //!	@fn		CApplication
 //!	@brief	コンストラクタ
 //!	@param	
 //!	@retval	
 //==============================================================================
-Application :: Application(): m_SystemCounter		( 0 )
-{}
+Application::Application() : m_SystemCounter(0)
+{
+}
 
 //==============================================================================
 //!	@fn		~Application
@@ -53,7 +69,7 @@ Application :: Application(): m_SystemCounter		( 0 )
 //==============================================================================
 Application :: ~Application()
 {
-	Dispose();
+    Dispose();
 }
 
 //==============================================================================
@@ -62,11 +78,11 @@ Application :: ~Application()
 //!	@param	
 //!	@retval	インスタンス
 //==============================================================================
-Application* Application::Instance()
+Application * Application::Instance()
 {
-	static Application Instance;
+    static Application Instance;
 
-	return &Instance;
+    return &Instance;
 }
 
 //==============================================================================
@@ -75,7 +91,7 @@ Application* Application::Instance()
 //!	@param	
 //!	@retval	
 //==============================================================================
-void Application :: InitSystemWH()
+void Application::InitSystemWH()
 {
 
 }
@@ -86,40 +102,40 @@ void Application :: InitSystemWH()
 //!	@param	インスタンスハンドル
 //!	@retval	
 //==============================================================================
-bool Application :: Init( HINSTANCE h_Instance )
+bool Application::Init(HINSTANCE h_Instance)
 {
-	// メモリーリークを検出
-	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF|_CRTDBG_LEAK_CHECK_DF);
+    // メモリーリークを検出
+    _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
-	// コンソールを割り当てる
-	AllocConsole();
+    // コンソールを割り当てる
+    AllocConsole();
 
-	// 標準出力の割り当て
-	freopen_s(&m_fp, "CON", "w", stdout);    
+    // 標準出力の割り当て
+    freopen_s(&m_fp , "CON" , "w" , stdout);
 
-	// 幅と高さ初期化
-	InitSystemWH();
+    // 幅と高さ初期化
+    InitSystemWH();
 
-	// ウインドウ作成
-	CWindow* window = CWindow::Instance();
-	window->RegisterClass( h_Instance, WINDOW_CLASS_NAME, CS_OWNDC );
+    // ウインドウ作成
+    CWindow * window = CWindow::Instance();
+    window->RegisterClass(h_Instance , WINDOW_CLASS_NAME , CS_OWNDC);
 
-	window->SetWindow( h_Instance,
-					   WINDOW_STYLE_WINDOWED,
-					   WINDOW_EX_STYLE_WINDOWED,
-					   NULL,
-					   CLIENT_WIDTH + SYSTEM_WIDTH,
-					   CLIENT_HEIGHT + SYSTEM_HEIGHT,
-					   WINDOW_CLASS_NAME,
-					   WINDOW_TITLE,
-					   false);
-			
-	// HWND
-	m_hWnd = window->GetHandle();
+    window->SetWindow(h_Instance ,
+        WINDOW_STYLE_WINDOWED ,
+        WINDOW_EX_STYLE_WINDOWED ,
+        NULL ,
+        CLIENT_WIDTH + SYSTEM_WIDTH ,
+        CLIENT_HEIGHT + SYSTEM_HEIGHT ,
+        WINDOW_CLASS_NAME ,
+        WINDOW_TITLE ,
+        false);
 
-	//
-	m_hInst = h_Instance;
-	return true;
+    // HWND
+    m_hWnd = window->GetHandle();
+
+    //
+    m_hInst = h_Instance;
+    return true;
 }
 
 //==============================================================================
@@ -128,14 +144,14 @@ bool Application :: Init( HINSTANCE h_Instance )
 //!	@param	
 //!	@retval	
 //==============================================================================
-void Application :: Dispose()
+void Application::Dispose()
 {
-	// 標準出力クローズ
-	fclose(m_fp);
-	// コンソール開放
-	::FreeConsole();
+    // 標準出力クローズ
+    fclose(m_fp);
+    // コンソール開放
+    ::FreeConsole();
 
-	return;
+    return;
 }
 
 //==============================================================================
@@ -144,53 +160,125 @@ void Application :: Dispose()
 //!	@param	
 //!	@retval	メッセージID
 //==============================================================================
-unsigned long Application :: MainLoop()
+unsigned long Application::MainLoop()
 {
-	MSG		msg;	
-	ZeroMemory( &msg, sizeof( msg ) );	
+    MSG		msg;
+    ZeroMemory(&msg , sizeof(msg));
 
-	CWindow* window = CWindow::Instance();
+    CWindow * window = CWindow::Instance();
 
-	uint64_t current_time = 0;
-	uint64_t last_time = 0;
+    uint64_t current_time = 0;
+    uint64_t last_time = 0;
 
-	// ゲームの初期処理
-	GameInit();
+    // DX11初期化
+    SystemInit();
 
-	// タイマ解像度をミリ秒に
-	::timeBeginPeriod(1);
+    app_state = TITLE_INIT;
 
-	while (window->ExecMessage()) {
+    Title title;
+    int game_num = 10;
 
-		// timeGetTime関数は、ミリ秒単位でシステム時刻を取得します。 
-		// システム時間は、Windowsを起動してからの経過時間です。
-		current_time = ::timeGetTime();	
+    // タイマ解像度をミリ秒に
+    ::timeBeginPeriod(1);
 
-		uint64_t delta_time = current_time - last_time;
+    // ゲームループ
+    while (window->ExecMessage())
+    {
+        switch (app_state)
+        {
+            // タイトルの初期化
+            case TITLE_INIT:
+                title.TitleInit();
+                title.TitlePreparationData();
+                app_state = TITLE;
+                Fade::FadeInit();
+                break;
+                // タイトル処理
+            case TITLE:
+                if (!title.m_ready_flg)
+                {
+                    title.TitlePreparation();
+                }
+                else
+                {
+                    game_num = title.TitleUpdate();
+                }
 
-		last_time = current_time;
+                if (Fade::m_fade_time < 500)
+                {
+                    Fade::FadeUpdate();
+                    Fade::FadeDraw();
+                    break;
+                }
 
-		GameInput(delta_time);		// ｹﾞｰﾑ入力	
-		GameUpdate(delta_time);		// ｹﾞｰﾑ更新
-		GameRender(delta_time);		// ｹﾞｰﾑ描画
+                title.TitleDraw();
+                break;
+                // ゲームの初期処理
+            case GAME_INIT:
+                Fade::FadeInit();
+                Fade::FadeDraw();
+                GameInit();
+                app_state = GAME;
+                break;
+                // ゲーム本編
+            case GAME:
 
-		int64_t sleep_time = 16666 - delta_time;
+                //if (Fade::m_fade_time < 500)
+                //{
+                //    Fade::FadeUpdate();
+                //    Fade::FadeDraw();
+                //    break;
+                //}
 
-		if (sleep_time > 0) {
-			float tt = sleep_time / 1000.0f;
-//			printf("sleep:%f \n", tt);
-			std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(tt)));
-			//指定した相対時間だけ現スレッドをブロックする (function template)
-		}
-	}
+                // timeGetTime関数は、ミリ秒単位でシステム時刻を取得します。 
+                // システム時間は、Windowsを起動してからの経過時間です。
+                current_time = ::timeGetTime();
 
-	// タイマ解像度を元に戻す
-	::timeEndPeriod(1);
+                uint64_t delta_time = current_time - last_time;
 
-	// ゲームの終了処理
-	GameDispose();
+                last_time = current_time;
 
-	return window->GetMessage();
+                GameInput(delta_time);		// ｹﾞｰﾑ入力	
+                GameUpdate(delta_time);		// ｹﾞｰﾑ更新
+                GameRender(delta_time);		// ｹﾞｰﾑ描画
+
+                int64_t sleep_time = 16666 - delta_time;
+
+                if (sleep_time > 0)
+                {
+                    float tt = sleep_time / 1000.0f;
+                    //			printf("sleep:%f \n", tt);
+                    std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(tt)));
+                    //指定した相対時間だけ現スレッドをブロックする (function template)
+                }
+                break;
+                //case RESULT_INT:
+                //    break;
+                //case RESULT:
+                //    break;
+        }
+
+        switch (game_num)
+        {
+            case 0:
+                app_state = GAME_INIT;
+                game_num = 10;
+                break;
+            default:
+                break;
+        }
+
+    }
+
+    // タイマ解像度を元に戻す
+    ::timeEndPeriod(1);
+
+    // ゲームの終了処理
+    GameDispose();
+
+    SystemFinalize();
+
+    return window->GetMessage();
 }
 
 //==============================================================================
@@ -199,7 +287,7 @@ unsigned long Application :: MainLoop()
 //!	@param	
 //!	@retval	
 //==============================================================================
-void Application :: Input(uint64_t deltataime)
+void Application::Input(uint64_t deltataime)
 {
 }
 
@@ -209,10 +297,10 @@ void Application :: Input(uint64_t deltataime)
 //!	@param	
 //!	@retval	
 //==============================================================================
-void Application :: Update(uint64_t deltataime)
+void Application::Update(uint64_t deltataime)
 {
-	// システムカウンタ
-	m_SystemCounter ++;
+    // システムカウンタ
+    m_SystemCounter++;
 }
 
 //==============================================================================
@@ -221,7 +309,7 @@ void Application :: Update(uint64_t deltataime)
 //!	@param	
 //!	@retval	
 //==============================================================================
-void Application :: Render(uint64_t deltatime)
+void Application::Render(uint64_t deltatime)
 {
 }
 
@@ -231,9 +319,9 @@ void Application :: Render(uint64_t deltatime)
 //!	@param	
 //!	@retval	HWND
 //==============================================================================
-HWND Application :: GetHWnd()
+HWND Application::GetHWnd()
 {
-	return m_hWnd;
+    return m_hWnd;
 }
 
 //==============================================================================
@@ -244,7 +332,7 @@ HWND Application :: GetHWnd()
 //==============================================================================
 HINSTANCE Application::GetHInst()
 {
-	return m_hInst;
+    return m_hInst;
 }
 
 //******************************************************************************

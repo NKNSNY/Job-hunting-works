@@ -8,11 +8,26 @@ bool TextureMgr::TextureLoad()
     CreateSRVfromFile("assets/qube/white.png" , dev , devcontext ,
         nullptr , &white_texture);
 
+    CreateSRVfromFile("assets/UI/number.png" , dev , devcontext ,
+        nullptr , &number_texture);
+
+    CreateSRVfromFile("assets/UI/title_back.png" , dev , devcontext ,
+        nullptr , &title_back);
+
     //CreateSRVfromFile("assets/qube/‰Ã“¡wanted.png" , dev , devcontext ,
         //nullptr , &kato_hideyuki);
 
     dev->Release();
     devcontext->Release();
+
+    return true;
+}
+
+bool TextureMgr::TexutureFinalize()
+{
+    white_texture->Release();
+    number_texture->Release();
+    title_back->Release();
 
     return true;
 }
