@@ -5,15 +5,11 @@
 #include "TextureMgr.h"
 
 ID3D11ShaderResourceView * TextureMgr::white_texture;
+//ID3D11ShaderResourceView * TextureMgr
 
 bool Qube::m_modelloadflg = false;
 
-bool Qube::Init()
-{
-    return false;
-}
-
-bool Qube::Init(int qube_type_num)
+void Qube::Load()
 {
     // 行列初期化
     DX11MtxIdentity(m_mtx);					// モデルを読み込む
@@ -48,7 +44,7 @@ bool Qube::Init(int qube_type_num)
     // テクスチャ初期化（ビルボード）
     for (int i = 0; i < 6; i++)
     {
-        switch (qube_type_num)
+        switch (0)
         {
             case 0:
                 m_qube_type = NORMAL_QUBE;
@@ -76,7 +72,10 @@ bool Qube::Init(int qube_type_num)
     m_qube_shadow.Init(0.0f , 0.0f , 0.0f , 0.0f , 0.0f , { 0.0f,0.0f,0.0f,0.5f });
     m_qube_shadow.SetUV(u , v);
     m_qube_shadow.SetUV(uv);
+}
 
+bool Qube::Init()
+{
     m_fall_flg = false;
 
     m_shadow_create_flg = true;
@@ -84,6 +83,9 @@ bool Qube::Init(int qube_type_num)
     m_move_qube_time = 31;
 
     m_move_qube_flg = false;
+
+    m_delete_fall_time = 0;
+    m_delete_fall_flg = false;
 
     return true;
 }
@@ -95,6 +97,12 @@ bool Qube::Update()
     for (int i = 0; i < 5; i++)
     {
         m_qube_alpha [i].SetColor({ 0.0f,0.0f,0.0f, fall_alpha });
+    }
+
+    if (m_delete_fall_time > 0)
+    {
+        m_delete_fall_time--;
+        m_mtx._42 -= 0.5f;
     }
 
     return true;
@@ -268,4 +276,19 @@ bool Qube::SetRot(DirectX::XMFLOAT3 rot)
     DX11MtxMultiply(m_mtx , mtx , m_mtx);
 
     return true;
+}
+
+void Qube::SetQubeStatus(Qube qube)
+{
+    m_mtx = qube.m_mtx;
+
+    m_fall_distance = qube.m_fall_distance;
+    m_survival_time = qube.m_survival_time;
+    m_fall_speed = qube.m_fall_speed;
+    m_fall_flg = qube.m_fall_flg;
+    m_first_survival_time = qube.m_first_survival_time;
+    m_first_fall_distance = qube.m_first_fall_distance;
+    m_shadow_create_flg = qube.m_shadow_create_flg;
+    m_move_qube_flg = qube.m_move_qube_flg;
+    m_qube_type = qube.m_qube_type;
 }

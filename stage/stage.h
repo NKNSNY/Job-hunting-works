@@ -15,6 +15,8 @@ class Stage
 {
 public:
 
+    static void StageLoad();
+
     // ステージの幅、高さ、落下距離、生存時間、落下速度を入力（上限　幅 7　高さ 20）
     static bool Init(int stage_width , int stage_hight , int fall_time , int survival_time , int fall_speed);
     static bool Update();
@@ -48,11 +50,15 @@ private:
         return (number_z * m_stage_width) + number_x + (number_y * pow(m_stage_width , 2));
     }
 
+    // キューブ型(105個を再利用していく)
+    static Qube m_stage_qube [735];
+
     // ステージの大きさ　[高さ][縦幅][横幅]
-    static int m_stage [20][7][7];
+    static int m_stage [65536][7][7];
 
     static int m_stage_width;           // ステージの横幅
-    static int m_stage_hight;           // ステージの縦幅
+    static int m_stage_hight;           // ステージの使用できる高さ縦幅
+    static int m_max_hight;             // ステージの指定した高さ
 
     static int m_stage_bottom;         // ステージの現在の一番下
     static int m_stage_top [7][7];    // ステージの現在の高さの情報
@@ -64,8 +70,8 @@ private:
     static int m_create_bottom;      // 落下高さの上限を上げていく
 
     static int m_stage_color;          // 現在のステージの色
-    static bool m_stage_color_flg_x [20][7];        // 横一列の色を変えるフラグ
-    static bool m_stage_color_flg_y [20][7];        // 縦一列の色を変えるフラグ
+    static bool m_stage_color_flg_x [65536][7];        // 横一列の色を変えるフラグ
+    static bool m_stage_color_flg_y [65536][7];        // 縦一列の色を変えるフラグ
     static bool m_stage_color_reset_flg;             // 色をリセットするフラグ
 
     static int m_next_add_score;                      // 色が変わった時に増える数値

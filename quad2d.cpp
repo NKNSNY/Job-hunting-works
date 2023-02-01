@@ -193,6 +193,11 @@ void Quad2D::SetUV(XMFLOAT2 * texture_uv)
     }
 }
 
+void Quad2D::SetRotationY(float angle)
+{
+    DX11MtxRotationY(angle , m_worldmtx);
+}
+
 // Zé≤âÒì]
 void Quad2D::SetRotation(float angle)
 {
@@ -367,4 +372,24 @@ void Quad2D::ChangeNumberUV(int uv_num)
             break;
     }
 
+}
+
+void Quad2D::ChangeSize(int width , int height)
+{
+    m_width = static_cast<float>(width);
+    m_height = static_cast<float>(height);
+
+    // ç¿ïW
+    XMFLOAT2 v [4] = {
+        XMFLOAT2(-m_width / 2.0f,	-m_height / 2.0f),
+        XMFLOAT2(m_width / 2.0f,	-m_height / 2.0f),
+        XMFLOAT2(-m_width / 2.0f,	 m_height / 2.0f),
+        XMFLOAT2(m_width / 2.0f,	 m_height / 2.0f),
+    };
+
+    for (int i = 0; i < 4; i++)
+    {
+        m_vertex [i].pos.x = v [i].x;
+        m_vertex [i].pos.y = v [i].y;
+    }
 }

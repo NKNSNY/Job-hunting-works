@@ -16,6 +16,8 @@
 #include "stage/stage.h"
 #include "quad2d.h"
 #include "number_billboard.h"
+#include "custom_status.h"
+#include "game.h"
 
 constexpr int stage_qube_num = 5;
 constexpr int player_y = 1;
@@ -31,7 +33,14 @@ Quad2D UI_score;
 Quad2D UI_score_num [6];
 Num_Billboard billboard_score;
 
-void GameInit()
+int g_stage_rate;
+
+void GameLoad()
+{
+    Stage::StageLoad();
+}
+
+void GameInit(CustomStatus cs)
 {
     // カメラの位置と注視点をセット（正方形の中心を見る）
     CCamera::GetInstance()->m_camera_eye = { ((float) stage_qube_num - 1.0f) * 10.0f , 180.0f + (player_y + 20.0f) ,
@@ -60,7 +69,9 @@ void GameInit()
         DirectX::XMFLOAT4(1 , 1 , -1 , 0));
 
 
-    Stage::Init(stage_qube_num , 5 , 1000 , 1500 , 5);
+    //Stage::Init(stage_qube_num , 5 , 1000 , 1500 , 5);
+    Stage::Init(cs.stage_width , cs.stage_height , cs.fall_distance , cs.survival_time , cs.fall_speed);
+    g_stage_rate = cs.qube_rate;
 
     g_player.Init(stage_qube_num , player_y);
 
@@ -93,6 +104,8 @@ void GameInit()
 
     billboard_score.Init();
 
+    score = 0;
+
 }
 
 void GameInput(uint64_t dt)
@@ -100,7 +113,7 @@ void GameInput(uint64_t dt)
     CDirectInput::GetInstance().GetKeyBuffer();
 }
 
-void GameUpdate(uint64_t dt)
+int GameUpdate(uint64_t dt)
 {
     if (CDirectInput::GetInstance().CheckKeyBufferTrigger(DIK_SPACE))
     {
@@ -140,7 +153,7 @@ void GameUpdate(uint64_t dt)
     }
 
     Stage::Update();
-    Stage::StageRateUpdate(2);
+    Stage::StageRateUpdate(g_stage_rate);
 
     XMFLOAT3 pos {};
     pos.x = g_player.m_player_chip.m_char_chip_pos.x;
@@ -148,6 +161,8 @@ void GameUpdate(uint64_t dt)
     pos.z = g_player.m_player_chip.m_char_chip_pos.z;
 
     ui_num = Stage::ChangeColor(pos);
+
+    ui_num.player_hp = 10000;
 
     g_player.m_player_hp += ui_num.player_hp;
     score += ui_num.stage_score;
@@ -166,8 +181,9 @@ void GameUpdate(uint64_t dt)
 
     g_player.m_player_crush_flg = Stage::CrushPlayer(pos , g_player.m_walk_time);
 
-    while (g_player.m_player_hp < 0)
+    if (g_player.m_player_hp < 0)
     {
+        return 4;
     }
 
     if ((g_player.m_player_chip.m_char_chip_pos.y * 20.0f != CCamera::GetInstance()->m_camera_lookat.y) &&
@@ -203,6 +219,8 @@ void GameUpdate(uint64_t dt)
     {
         billboard_score.Update(pos , CCamera::GetInstance()->m_camera_pos , ui_num.stage_score);
     }
+
+    return 10;
 
 }
 

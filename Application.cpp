@@ -19,6 +19,9 @@
 #include "game.h"
 #include "title.h"
 #include "fade.h"
+#include "result.h"
+#include "custom.h"
+#include "custom_status.h"
 
 //-----------------------------------------------------------------------------
 // スタティック　メンバー
@@ -45,6 +48,8 @@ enum AppState
     TITLE ,
     GAME_INIT ,
     GAME ,
+    CUSTOM_INIT ,
+    CUSTOM ,
     RESULT_INT ,
     RESULT ,
 };
@@ -173,10 +178,22 @@ unsigned long Application::MainLoop()
     // DX11初期化
     SystemInit();
 
+    uint64_t delta_time = current_time - last_time;
+    int64_t sleep_time = 16666 - delta_time;
+
     app_state = TITLE_INIT;
 
     Title title;
+    Result result;
+    Custom custom;
     int game_num = 10;
+    //CustomPlus csp = { 5 , 10 , 1000 , 1000 , 5 , 2 , 10 };
+    CustomPlus csp = { 5 , 100 , 1000 , 500 , 10 , 10 , 10 };
+
+    title.TitleLoad();
+    result.ResultLoad();
+    custom.CustomLoad();
+    GameLoad();
 
     // タイマ解像度をミリ秒に
     ::timeBeginPeriod(1);
@@ -217,32 +234,28 @@ unsigned long Application::MainLoop()
             case GAME_INIT:
                 Fade::FadeInit();
                 Fade::FadeDraw();
-                GameInit();
+                GameInit(csp.cs);
                 app_state = GAME;
                 break;
                 // ゲーム本編
             case GAME:
 
-                //if (Fade::m_fade_time < 500)
-                //{
-                //    Fade::FadeUpdate();
-                //    Fade::FadeDraw();
-                //    break;
-                //}
+                if (Fade::m_fade_time < 500)
+                {
+                    Fade::FadeUpdate();
+                    Fade::FadeDraw();
+                    break;
+                }
 
                 // timeGetTime関数は、ミリ秒単位でシステム時刻を取得します。 
                 // システム時間は、Windowsを起動してからの経過時間です。
                 current_time = ::timeGetTime();
 
-                uint64_t delta_time = current_time - last_time;
-
                 last_time = current_time;
 
                 GameInput(delta_time);		// ｹﾞｰﾑ入力	
-                GameUpdate(delta_time);		// ｹﾞｰﾑ更新
+                game_num = GameUpdate(delta_time);		// ｹﾞｰﾑ更新
                 GameRender(delta_time);		// ｹﾞｰﾑ描画
-
-                int64_t sleep_time = 16666 - delta_time;
 
                 if (sleep_time > 0)
                 {
@@ -252,16 +265,63 @@ unsigned long Application::MainLoop()
                     //指定した相対時間だけ現スレッドをブロックする (function template)
                 }
                 break;
-                //case RESULT_INT:
-                //    break;
-                //case RESULT:
-                //    break;
+            case CUSTOM_INIT:
+                custom.CustomInit();
+                app_state = CUSTOM;
+                break;
+            case CUSTOM:
+                csp = custom.CustomUpdate();
+                game_num = csp.game_num;
+                custom.CustomDraw();
+                break;
+
+            case RESULT_INT:
+                result.ResultInit();
+                app_state = RESULT;
+                Fade::FadeInit();
+                break;
+            case RESULT:
+                if (Fade::m_fade_time < 500)
+                {
+                    Fade::FadeUpdate();
+                    Fade::FadeDraw();
+                    break;
+                }
+
+                game_num = result.ResultUpdate();
+                result.ResultDraw();
+                break;
         }
 
         switch (game_num)
         {
+            // ゲーム開始
             case 0:
                 app_state = GAME_INIT;
+                game_num = 10;
+                break;
+                // カスタム画面
+            case 1:
+                app_state = CUSTOM_INIT;
+                game_num = 10;
+                break;
+                // チャレンジ画面
+            case 2:
+                game_num = 10;
+                break;
+                // ゲームクリア
+            case 3:
+                app_state = RESULT_INT;
+                game_num = 10;
+                break;
+                // ゲームオーバー
+            case  4:
+                app_state = RESULT_INT;
+                game_num = 10;
+                break;
+                // タイトル画面
+            case 5:
+                app_state = TITLE_INIT;
                 game_num = 10;
                 break;
             default:

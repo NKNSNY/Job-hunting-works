@@ -7,6 +7,8 @@ class Title
 {
 public:
 
+    void TitleLoad();
+
     void TitleInit();
     int TitleUpdate();
     void TitleDraw();
@@ -31,6 +33,8 @@ private:
     Quad2D m_challenge_play;
     Quad2D m_choose_arrow;
 
+    Quad2D m_title_cover;
+
     int m_choose_pos;
     bool m_choose_move_flg;         // trueはプラス , falseはマイナス
     bool m_choose_alpha_flg;         // trueはプラス , falseはマイナス
@@ -42,4 +46,5 @@ private:
     DirectX::XMFLOAT3 m_qube_pos;       // 変化していくキューブの位置
     DirectX::XMFLOAT3 m_title_pos;      // 変化していくタイトルの位置
 
+    DirectX::XMFLOAT3 m_title_cover_pos;    // タイトルをモーショングラフィックスさせる
 };

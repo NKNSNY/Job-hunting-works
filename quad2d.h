@@ -82,6 +82,8 @@ public:
 	// UVをセット
 	void SetUV(DirectX::XMFLOAT2 * texture_uv);
 
+	// Y軸回転
+	void SetRotationY(float angle);
 	// Z軸回転
 	void SetRotation(float angle);
 
@@ -140,6 +142,8 @@ public:
 	void ChangeRainbowColor();
 	// 数字のUVを変える
 	void ChangeNumberUV(int uv_num);
+	// サイズを変える
+	void ChangeSize(int width , int height);
 
 private:
 	DirectX::XMFLOAT4X4		m_worldmtx;				// ワールド変換行列

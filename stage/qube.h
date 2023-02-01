@@ -15,10 +15,9 @@ class Qube :public GameObject
 {
 public:
 
-    // オーバーロード
-    bool Init();
+    void Load();
 
-    bool Init(int qube_type_num);
+    bool Init();
     bool Update();
     bool Draw();
     bool Draw(int not_billboard_draw);    // キューブだけ描画
@@ -37,6 +36,8 @@ public:
     bool SetFall(int fall_distance , int survival_time , int fall_speed);
     // 回転する
     bool SetRot(DirectX::XMFLOAT3 rot);
+    // キューブステータスの入れ替え
+    void SetQubeStatus(Qube qube);
 
     int m_fall_distance;               // 落下距離
     int m_survival_time;              // 残っている時間
@@ -46,6 +47,9 @@ public:
     int m_first_fall_distance;      // 元の落下距離
 
     bool m_shadow_create_flg;     // 影を出すかどうか
+
+    int m_delete_fall_time;          // 奈落に落ちていく時間
+    bool m_delete_fall_flg;          // 奈落に落ちるかどうか
 
     DirectX::XMFLOAT3 m_before_qube_pos;        // キューブの動く前の位置
     DirectX::XMFLOAT3 m_after_qube_pos;         // キューブの動いた後の位置

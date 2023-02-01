@@ -126,6 +126,7 @@
     <ClCompile Include="CDirectXGraphics.cpp" />
     <ClCompile Include="CModel.cpp" />
     <ClCompile Include="collision.cpp" />
+    <ClCompile Include="custom.cpp" />
     <ClCompile Include="dx11_init.cpp" />
     <ClCompile Include="fade.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
@@ -143,6 +144,7 @@
     <ClCompile Include="player\player_anim_data.cpp" />
     <ClCompile Include="player\player_chip.cpp" />
     <ClCompile Include="quad2d.cpp" />
+    <ClCompile Include="result.cpp" />
     <ClCompile Include="Sphere.cpp" />
     <ClCompile Include="CWindow.cpp" />
     <ClCompile Include="CWindowCallback.cpp" />
@@ -168,6 +170,8 @@
     <ClInclude Include="BoundingSphere.h" />
     <ClInclude Include="CBillBoard.h" />
     <ClInclude Include="collision.h" />
+    <ClInclude Include="custom.h" />
+    <ClInclude Include="custom_status.h" />
     <ClInclude Include="dx11_init.h" />
     <ClInclude Include="fade.h" />
     <ClInclude Include="imgui\imconfig.h" />
@@ -186,6 +190,7 @@
     <ClInclude Include="player\player_anim_data.h" />
     <ClInclude Include="player\player_chip.h" />
     <ClInclude Include="quad2d.h" />
+    <ClInclude Include="result.h" />
     <ClInclude Include="Sphere.h" />
     <ClInclude Include="drawaxis.h" />
     <ClInclude Include="gameobject.h" />
