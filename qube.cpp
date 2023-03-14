@@ -1,11 +1,10 @@
-#include "qube.h"
+#include "stage/qube.h"
 #include "dx11mathutil.h"
 #include "ModelMgr.h"
 #include "CCamera.h"
 #include "TextureMgr.h"
 
 ID3D11ShaderResourceView * TextureMgr::white_texture;
-//ID3D11ShaderResourceView * TextureMgr
 
 bool Qube::m_modelloadflg = false;
 
@@ -61,17 +60,18 @@ void Qube::Load()
 
         if (i != 5)
         {
-            m_qube_alpha [i].SetSRV(TextureMgr::white_texture);
+            m_qube_alpha [i].SetSRV(TextureMgr::custom_back);
             m_qube_alpha [i].Init(0.0f , 0.0f , 0.0f , 12.0f , 6.5f , { 0.0f,0.0f,0.0f,0.0f });
             m_qube_alpha [i].SetUV(u , v);
             m_qube_alpha [i].SetUV(uv);
         }
     }
 
-    m_qube_shadow.SetSRV(TextureMgr::white_texture);
+    m_qube_shadow.SetSRV(TextureMgr::result_game_over);
     m_qube_shadow.Init(0.0f , 0.0f , 0.0f , 0.0f , 0.0f , { 0.0f,0.0f,0.0f,0.5f });
     m_qube_shadow.SetUV(u , v);
     m_qube_shadow.SetUV(uv);
+
 }
 
 bool Qube::Init()
@@ -92,12 +92,7 @@ bool Qube::Init()
 
 bool Qube::Update()
 {
-    float fall_alpha = 1.0f - ((float) m_survival_time / (float) m_first_survival_time);
-
-    for (int i = 0; i < 5; i++)
-    {
-        m_qube_alpha [i].SetColor({ 0.0f,0.0f,0.0f, fall_alpha });
-    }
+    m_survival_alpha = 1.0f - ((float) m_survival_time / (float) m_first_survival_time);
 
     if (m_delete_fall_time > 0)
     {
@@ -126,6 +121,11 @@ bool Qube::Draw()
     m_qube_texture [5].SetPosition({ billboard_pos.x , billboard_pos.y - 10.1f , billboard_pos.z });      // 下
     m_qube_texture [5].DrawRotateBillBoard(CCamera::GetInstance()->GetProjectionMatrix() , 270.0f , 1);
 
+    for (int i = 0; i < 5; i++)
+    {
+        m_qube_alpha [i].SetColor({ 0.0f,0.0f,0.0f,m_survival_alpha });
+    }
+
     // テクスチャの少し前に貼る
     m_qube_alpha [0].SetPosition({ billboard_pos.x , billboard_pos.y , billboard_pos.z - 10.2f });      // 前
     m_qube_alpha [0].DrawBillBoard(CCamera::GetInstance()->GetProjectionMatrix());
@@ -137,6 +137,8 @@ bool Qube::Draw()
     m_qube_alpha [3].DrawRotateBillBoard(CCamera::GetInstance()->GetProjectionMatrix() , 90.0f , 2);
     m_qube_alpha [4].SetPosition({ billboard_pos.x , billboard_pos.y - 10.2f , billboard_pos.z });      // 下
     m_qube_alpha [4].DrawRotateBillBoard(CCamera::GetInstance()->GetProjectionMatrix() , 270.0f , 1);
+
+    m_qube_shadow.SetSize(m_shadow_size.x , m_shadow_size.y);
 
     // 上に貼る
     m_qube_shadow.SetPosition({ billboard_pos.x , billboard_pos.y + 10.2f , billboard_pos.z });      // 上
@@ -217,11 +219,8 @@ bool Qube::ShadowUpdate(int fall_distance , int first_fall_distance)
 {
     float shadow_rate = 1.0f - ((float) fall_distance / (float) first_fall_distance);
 
-    XMFLOAT2 shadow_size {};
-    shadow_size.x = 12.0f * shadow_rate;
-    shadow_size.y = 6.5f * shadow_rate;
-
-    m_qube_shadow.SetSize(shadow_size.x , shadow_size.y);
+    m_shadow_size.x = 12.0f * shadow_rate;
+    m_shadow_size.y = 6.5f * shadow_rate;
 
     return true;
 }

@@ -3,12 +3,15 @@
 #include <vector>
 
 #include "qube.h"
+#include "../result_score.h"
 
 struct ReturnUI
 {
     int player_hp;
     int stage_score;
     int color_change_score;
+
+    ResultScore rs;
 };
 
 class Stage
@@ -50,8 +53,8 @@ private:
         return (number_z * m_stage_width) + number_x + (number_y * pow(m_stage_width , 2));
     }
 
-    // キューブ型(105個を再利用していく)
-    static Qube m_stage_qube [735];
+    // キューブ型(たくさんよういしたよ)
+    static Qube m_stage_qube [4900];
 
     // ステージの大きさ　[高さ][縦幅][横幅]
     static int m_stage [65536][7][7];

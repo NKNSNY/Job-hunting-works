@@ -22,6 +22,7 @@
 #include "result.h"
 #include "custom.h"
 #include "custom_status.h"
+#include "result_score.h"
 
 //-----------------------------------------------------------------------------
 // スタティック　メンバー
@@ -187,8 +188,9 @@ unsigned long Application::MainLoop()
     Result result;
     Custom custom;
     int game_num = 10;
-    //CustomPlus csp = { 5 , 10 , 1000 , 1000 , 5 , 2 , 10 };
-    CustomPlus csp = { 5 , 100 , 1000 , 500 , 10 , 10 , 10 };
+    CustomPlus csp = { 5 , 10 , 1000 , 1000 , 5 , 2 , 10 };
+    //CustomPlus csp = { 5 , 100 , 1000 , 500 , 10 , 10 , 10 };
+    ResultScore rs = { 0,0,0,0,0,0,0,0,0,0 };
 
     title.TitleLoad();
     result.ResultLoad();
@@ -208,6 +210,7 @@ unsigned long Application::MainLoop()
                 title.TitleInit();
                 title.TitlePreparationData();
                 app_state = TITLE;
+                csp = { 5 , 10 , 1000 , 1000 , 5 , 2 , 10 };
                 Fade::FadeInit();
                 break;
                 // タイトル処理
@@ -254,8 +257,10 @@ unsigned long Application::MainLoop()
                 last_time = current_time;
 
                 GameInput(delta_time);		// ｹﾞｰﾑ入力	
-                game_num = GameUpdate(delta_time);		// ｹﾞｰﾑ更新
+                rs = GameUpdate(delta_time);		// ｹﾞｰﾑ更新
                 GameRender(delta_time);		// ｹﾞｰﾑ描画
+
+                game_num = rs.result_judge;
 
                 if (sleep_time > 0)
                 {
@@ -276,7 +281,7 @@ unsigned long Application::MainLoop()
                 break;
 
             case RESULT_INT:
-                result.ResultInit();
+                result.ResultInit(rs);
                 app_state = RESULT;
                 Fade::FadeInit();
                 break;

@@ -101,7 +101,6 @@ void Title::TitleInit()
 
     m_ready_flg = false;
     m_preparation_num = rand() % 10;
-
 }
 
 int Title::TitleUpdate()

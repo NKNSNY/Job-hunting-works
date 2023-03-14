@@ -141,67 +141,6 @@ void Player::Draw()
 
 void Player::Update(int camera_pos)
 {
-    //XMFLOAT4 axisX;
-    //XMFLOAT4 axisY;
-    //XMFLOAT4 axisZ;
-
-    //static bool keyinput = true;
-
-    ////　本体の移動処理
-    ////  X軸を取り出す
-    //axisX.x = m_mtx._11;
-    //axisX.y = m_mtx._12;
-    //axisX.z = m_mtx._13;
-    //axisX.w = 0.0f;
-
-    //// Y軸を取り出す
-    //axisY.x = m_mtx._21;
-    //axisY.y = m_mtx._22;
-    //axisY.z = m_mtx._23;
-    //axisY.w = 0.0f;
-
-    //// Z軸を取り出す
-    //axisZ.x = m_mtx._31;
-    //axisZ.y = m_mtx._32;
-    //axisZ.z = m_mtx._33;
-    //axisZ.w = 0.0f;
-
-    //// 移動量及び角度を０にする
-    //m_speed = 0.0f;
-    //m_angle.x = m_angle.y = m_angle.z = 0.0f;
-
-    //// キー入力があった場合
-    //if (keyinput)
-    //{
-    //    XMFLOAT4 qt;	// クオータニオン
-
-    //    // 行列からクオータニオンを生成
-    //    DX11GetQtfromMatrix(m_mtx , qt);
-
-    //    XMFLOAT4 qtx , qty , qtz;		// クオータニオン
-
-    //    // 指定軸回転のクオータニオンを生成
-    //    DX11QtRotationAxis(qtx , axisX , m_angle.x);
-    //    DX11QtRotationAxis(qty , axisY , m_angle.y);
-    //    DX11QtRotationAxis(qtz , axisZ , m_angle.z);
-
-    //    // クオータニオンを合成
-    //    XMFLOAT4 tempqt1;
-    //    DX11QtMul(tempqt1 , qt , qtx);
-
-    //    XMFLOAT4 tempqt2;
-    //    DX11QtMul(tempqt2 , qty , qtz);
-
-    //    XMFLOAT4 tempqt3;
-    //    DX11QtMul(tempqt3 , tempqt1 , tempqt2);
-
-    //    // クオータニオンをノーマライズ
-    //    DX11QtNormalize(tempqt3 , tempqt3);
-
-    //    // クオータニオンから行列を作成
-    //    DX11MtxFromQt(m_mtx , tempqt3);
-    //}
-
     m_player_camera_pos = camera_pos;
 
     // ローカルポーズを更新する
@@ -210,13 +149,13 @@ void Player::Update(int camera_pos)
     // 親子関係を考慮した行列を計算する
     CaliculateParentChildMtx();
 
-    //keyinput = false;
-
+    // 上限を設ける
     if (m_player_hp > 10000)
     {
         m_player_hp = 10000;
     }
 
+    // プレイヤーが潰されたら体力大幅減少
     if (m_player_crush_flg)
     {
         m_player_hp -= 5000;
@@ -226,6 +165,7 @@ void Player::Update(int camera_pos)
         m_player_crush_flg = false;
     }
 
+    // 時間経過で体力減少
     if (m_player_hp > 0)
     {
         m_player_hp--;
@@ -236,12 +176,14 @@ void Player::Finalize()
 {
 }
 
-void Player::SetPlayerStageTop(int y , int x , int stage_top)
+void Player::SetPlayerStageTop(int y , int x , int stage_top , int stage_bottom)
 {
     if (m_player_chip.m_char_chip [y][x] != 99)
     {
         m_player_chip.m_char_chip [y][x] = stage_top - (m_player_hight - 1);
     }
+
+    m_player_stage_bottom = stage_bottom;
 }
 
 void Player::SetClimbFlg(int y , int x , bool fall_flg)
@@ -304,7 +246,7 @@ void Player::UpdateLocalpose()
     now_pos.y = m_player_chip.m_char_chip_pos.y * 20;
     now_pos.z = m_player_chip.m_char_chip_pos.z * -20;
 
-
+    // 入力したら移動する（左）
     if (CDirectInput::GetInstance().CheckKeyBuffer(DIK_LEFT) && m_walk_time == 31)
     {
         m_player_direction = 1;
@@ -314,6 +256,7 @@ void Player::UpdateLocalpose()
             partsangle [0].y = 270.0f + (90.0f * (m_player_camera_pos - 1));
         }
 
+        // カメラのポジションで移動位置を変える
         switch (m_player_camera_pos)
         {
             case 1:
@@ -409,7 +352,7 @@ void Player::UpdateLocalpose()
         }
     }
 
-
+    // キューブを動かすモード
     if (CDirectInput::GetInstance().CheckKeyBuffer(DIK_LSHIFT))
     {
         if (m_standby_direction == 0)
@@ -444,7 +387,6 @@ void Player::UpdateLocalpose()
         }
     }
 
-
     // パーツの角度ローカルポーズを表す行列を計算
     XMFLOAT4X4 partsmtx;
     for (int i = 0; i < 15; i++)
@@ -459,8 +401,6 @@ void Player::CaliculateParentChildMtx()
 {
 
     // ループを使わない
-
-    //m_mtxlocalpose [Player::HIP] = m_mtx;
 
     // 腰
     m_mtxParentChild [Player::HIP] = m_mtxlocalpose [Player::HIP];
@@ -553,7 +493,6 @@ void Player::MovePlayer(CharChipInt3 move_direction)
     {
         return;
     }
-
 
     // シフトを押していると押す引くモードになる
     if (m_standby_direction == 0)
@@ -704,14 +643,6 @@ void Player::MovePlayer(CharChipInt3 move_direction)
         // プレイヤーの二歩先にまだキューブが落ちてきていない、もしくは
         // プレイヤーの先にキューブがあり、かつ
         // オーバーフラグ（二歩先がオーバーしている）がtrue
-        //if ((((m_player_chip.m_char_chip [(int) player_pos.z][(int) player_pos.x] == 1) &&
-        //    (!m_player_climb_flg5 [(int) player_pos.z][(int) player_pos.x])) &&
-        //    ((m_player_chip.m_char_chip [(int) next_player_pos.z][(int) next_player_pos.x] == 0) ||
-        //        ((m_player_chip.m_char_chip [(int) next_player_pos.z][(int) next_player_pos.x] == 1) &&
-        //            (m_player_climb_flg5 [(int) next_player_pos.z][(int) next_player_pos.x])))) ||
-        //    (((m_player_chip.m_char_chip [(int) player_pos.z][(int) player_pos.x] == 1) &&
-        //        (!m_player_climb_flg5 [(int) player_pos.z][(int) player_pos.x])) &&
-        //        (over_flg)))
         if ((((m_player_chip.m_char_chip [(int) player_pos.z][(int) player_pos.x] == 1) &&
             (!m_player_climb_flg5 [(int) player_pos.z][(int) player_pos.x])) ||
             ((m_player_chip.m_char_chip [(int) player_pos.z][(int) player_pos.x] == 2) &&
@@ -758,11 +689,6 @@ void Player::MovePlayer(CharChipInt3 move_direction)
         // プレイヤーの進行方向ではなく　かつ
         // プレイヤーの目の前にキューブがある　かつ
         // キューブが落ちてきている
-        //else if ((((m_player_chip.m_char_chip [(int) player_pos.z][(int) player_pos.x] == 0) &&
-        //    (m_standby_direction % 2 == m_player_direction % 2)) &&
-        //    (m_standby_direction != m_player_direction)) &&
-        //    (m_player_chip.m_char_chip [(int) reverse_player_pos.z][(int) reverse_player_pos.x] == 1) &&
-        //    (!m_player_climb_flg5 [(int) reverse_player_pos.z][(int) reverse_player_pos.x]))
         else if (((m_player_chip.m_char_chip [(int) player_pos.z][(int) player_pos.x] == 0) ||
             ((m_player_chip.m_char_chip [(int) player_pos.z][(int) player_pos.x] == 1) &&
                 (m_player_climb_flg5 [(int) player_pos.z][(int) player_pos.x]))) &&

@@ -20,6 +20,9 @@ bool TextureMgr::TextureLoad()
     CreateSRVfromFile("assets/stage/custom.png" , dev , devcontext ,
         nullptr , &custom_back);
 
+    CreateSRVfromFile("assets/stage/risult.png" , dev , devcontext ,
+        nullptr , &result_score);
+
     //CreateSRVfromFile("assets/qube/‰Ã“¡wanted.png" , dev , devcontext ,
         //nullptr , &kato_hideyuki);
 
@@ -34,6 +37,9 @@ bool TextureMgr::TexutureFinalize()
     white_texture->Release();
     number_texture->Release();
     title_back->Release();
+    result_game_over->Release();
+    custom_back->Release();
+    result_score->Release();
 
     return true;
 }

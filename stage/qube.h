@@ -59,6 +59,10 @@ public:
 
     QubeType m_qube_type;                            // キューブの種類
 
+    float m_survival_alpha;                            // 徐々に黒くなっていく
+
+    DirectX::XMFLOAT2 m_shadow_size;            // 影の大きさ
+
 private:
 
     const char * XfileName;

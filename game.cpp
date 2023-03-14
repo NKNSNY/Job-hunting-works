@@ -19,7 +19,6 @@
 #include "custom_status.h"
 #include "game.h"
 
-constexpr int stage_qube_num = 5;
 constexpr int player_y = 1;
 
 Player g_player;
@@ -34,6 +33,9 @@ Quad2D UI_score_num [6];
 Num_Billboard billboard_score;
 
 int g_stage_rate;
+int g_stage_qube_width;
+
+ResultScore g_result_score;
 
 void GameLoad()
 {
@@ -43,10 +45,10 @@ void GameLoad()
 void GameInit(CustomStatus cs)
 {
     // カメラの位置と注視点をセット（正方形の中心を見る）
-    CCamera::GetInstance()->m_camera_eye = { ((float) stage_qube_num - 1.0f) * 10.0f , 180.0f + (player_y + 20.0f) ,
-        (float) stage_qube_num * -50 };
-    CCamera::GetInstance()->m_camera_lookat = { ((float) stage_qube_num - 1.0f) * 10.0f , player_y * 20.0f ,
-        ((float) stage_qube_num - 1.0f) * -10.0f };
+    CCamera::GetInstance()->m_camera_eye = { ((float) cs.stage_width - 1.0f) * 10.0f , 180.0f + (player_y + 20.0f) ,
+        (float) cs.stage_width * -50 };
+    CCamera::GetInstance()->m_camera_lookat = { ((float) cs.stage_width - 1.0f) * 10.0f , player_y * 20.0f ,
+        ((float) cs.stage_width - 1.0f) * -10.0f };
 
     // カメラの四方向の位置と回転の時間を設定
     CCamera::GetInstance()->m_camera_pos = 1;
@@ -72,8 +74,9 @@ void GameInit(CustomStatus cs)
     //Stage::Init(stage_qube_num , 5 , 1000 , 1500 , 5);
     Stage::Init(cs.stage_width , cs.stage_height , cs.fall_distance , cs.survival_time , cs.fall_speed);
     g_stage_rate = cs.qube_rate;
+    g_stage_qube_width = cs.stage_width;
 
-    g_player.Init(stage_qube_num , player_y);
+    g_player.Init(cs.stage_width , player_y);
 
     XMFLOAT2 uv [4] = { { 0.0f,0.0f},{1.0f,0.0f},{0.0f,1.0f},{1.0f,1.0f} };
 
@@ -113,8 +116,10 @@ void GameInput(uint64_t dt)
     CDirectInput::GetInstance().GetKeyBuffer();
 }
 
-int GameUpdate(uint64_t dt)
+ResultScore GameUpdate(uint64_t dt)
 {
+    g_result_score.result_judge = 10;
+
     if (CDirectInput::GetInstance().CheckKeyBufferTrigger(DIK_SPACE))
     {
         CCamera::GetInstance()->m_camera_move_flg = true;
@@ -122,7 +127,7 @@ int GameUpdate(uint64_t dt)
 
     if (CCamera::GetInstance()->m_camera_move_flg)
     {
-        CCamera::GetInstance()->Update(stage_qube_num);
+        CCamera::GetInstance()->Update(g_stage_qube_width);
     }
 
     g_player.Update(CCamera::GetInstance()->m_camera_pos);
@@ -162,19 +167,24 @@ int GameUpdate(uint64_t dt)
 
     ui_num = Stage::ChangeColor(pos);
 
-    ui_num.player_hp = 10000;
-
     g_player.m_player_hp += ui_num.player_hp;
     score += ui_num.stage_score;
     score += ui_num.color_change_score;
 
+    for (int i = 0; i < 8; i++)
+    {
+        g_result_score.color [i] += ui_num.rs.color [i];
+    }
+
+    g_result_score.score = score;
+
     pos.y++;
 
-    for (int y = 0; y < stage_qube_num; y++)
+    for (int y = 0; y < g_stage_qube_width; y++)
     {
-        for (int x = 0; x < stage_qube_num; x++)
+        for (int x = 0; x < g_stage_qube_width; x++)
         {
-            g_player.SetPlayerStageTop(y , x , Stage::GetStageTop(y , x));
+            g_player.SetPlayerStageTop(y , x , Stage::GetStageTop(y , x) , 1);
             g_player.SetClimbFlg(y , x , Stage::GetStageFallFlg(y , x));
         }
     }
@@ -183,7 +193,8 @@ int GameUpdate(uint64_t dt)
 
     if (g_player.m_player_hp < 0)
     {
-        return 4;
+        g_result_score.result_judge = 4;
+        return g_result_score;
     }
 
     if ((g_player.m_player_chip.m_char_chip_pos.y * 20.0f != CCamera::GetInstance()->m_camera_lookat.y) &&
@@ -220,7 +231,9 @@ int GameUpdate(uint64_t dt)
         billboard_score.Update(pos , CCamera::GetInstance()->m_camera_pos , ui_num.stage_score);
     }
 
-    return 10;
+    g_result_score.result_judge = 10;
+
+    return g_result_score;
 
 }
 

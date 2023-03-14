@@ -19,6 +19,7 @@ public:
     static ID3D11ShaderResourceView * title_back;             // タイトルの背景
     static ID3D11ShaderResourceView * result_game_over;    // ゲームオーバー
     static ID3D11ShaderResourceView * custom_back;          // カスタム画面
+    static ID3D11ShaderResourceView * result_score;         // リザルト画面
     //static ID3D11ShaderResourceView * kato_hideyuki;
 
 };

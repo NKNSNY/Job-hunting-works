@@ -4,7 +4,7 @@
 #include "CDirectInput.h"
 #include "stage.h"
 
-Qube Stage::m_stage_qube [735] {};
+Qube Stage::m_stage_qube [4900] {};
 int Stage::m_stage [65536][7][7] {};
 int Stage::m_stage_width {};
 int Stage::m_stage_hight {};
@@ -25,10 +25,9 @@ int Stage::m_now_add_score {};
 void Stage::StageLoad()
 {
     m_stage_qube [0].Load();
-    //m_stage_qube [1].Load();
 
     // ロード
-    for (int i = 1; i < 735; i++)
+    for (int i = 1; i < 4900; i++)
     {
         m_stage_qube [i] = m_stage_qube [0];
     }
@@ -40,13 +39,13 @@ bool Stage::Init(int stage_width , int stage_hight , int fall_time , int surviva
     switch (m_stage_width)
     {
         case 3:
-            m_stage_hight = 35;
+            m_stage_hight = 500;
             break;
         case 5:
-            m_stage_hight = 21;
+            m_stage_hight = 150;
             break;
         case 7:
-            m_stage_hight = 15;
+            m_stage_hight = 100;
             break;
     }
     m_max_hight = stage_hight;
@@ -54,6 +53,8 @@ bool Stage::Init(int stage_width , int stage_hight , int fall_time , int surviva
     // 全てのキューブを初期化
     for (int i = 0; i < m_stage_hight; i++)
     {
+        bool chanege_tex = false;
+
         for (int y = 0; y < m_stage_width; y++)
         {
             for (int x = 0; x < m_stage_width; x++)
@@ -62,6 +63,15 @@ bool Stage::Init(int stage_width , int stage_hight , int fall_time , int surviva
                 m_stage_qube [GetQubeNumber(x , i , y)].Init();
                 m_stage_qube [GetQubeNumber(x , i , y)].SetFall(fall_time + i * 20.0f , survival_time , fall_speed);
                 m_stage_qube [GetQubeNumber(x , i , y)].SetPos({ 0.0f + -y * 20.0f,0.0f + x * 20.0f,fall_time + i * 20.0f });
+
+                int random = rand() % (int) pow(m_stage_width , 2);
+                random -= GetQubeNumber(x , 0 , y);
+
+                if ((random < 0 && !chanege_tex) && i != 0)
+                {
+                    chanege_tex = true;
+                    m_stage_qube [GetQubeNumber(x , i , y)].ChangeTexture(HEAL_QUBE);
+                }
 
                 if (i == m_max_hight - 1)
                 {
@@ -73,8 +83,6 @@ bool Stage::Init(int stage_width , int stage_hight , int fall_time , int surviva
             m_stage_color_flg_y [i][y] = false;
         }
     }
-
-    //m_stage_qube [32].ChangeTexture(HEAL_QUBE);
 
     // 一番下は通常ブロックを表示
     for (int y = 0; y < m_stage_width; y++)
@@ -88,17 +96,6 @@ bool Stage::Init(int stage_width , int stage_hight , int fall_time , int surviva
             m_stage_top [y][x] = 0;
         }
     }
-
-    //m_stage [1][1][2] = 1;
-    //m_stage_qube [32].m_fall_distance = 0;
-    //m_stage_qube [32].SetPos({ -20.0f,40.0f,20.0f });
-    //m_stage_top [1][2] = 1;
-
-    //m_stage [2][1][2] = 1;
-    //m_stage_qube 57].SetFall(0 , survival_time , 0);
-    //m_stage_qube [57].SetPos({ -20.0f,40.0f,40.0f });
-    //m_stage_top [1][2] = 2;
-
 
     m_stage_bottom = 0;
     m_create_bottom = 0;
@@ -246,23 +243,8 @@ bool Stage::Update()
                 m_stage_qube [GetQubeNumber(x , i , y)].Update();
                 if (m_stage_qube [GetQubeNumber(x , i , y)].m_delete_fall_time == 0 && m_stage_qube [GetQubeNumber(x , i , y)].m_delete_fall_flg)
                 {
-                    stage_fall_flg = true;
                     m_stage_qube [GetQubeNumber(x , i , y)].m_delete_fall_flg = false;
                 }
-
-                if (stage_fall_flg)
-                {
-                    if (i == m_stage_hight - 1)
-                    {
-                        m_stage_qube [GetQubeNumber(x , i , y)].SetFall(m_stage_qube [GetQubeNumber(x , i , y)].m_fall_distance + 20 ,
-                            m_stage_qube [GetQubeNumber(x , i , y)].m_survival_time , m_stage_qube [GetQubeNumber(x , i , y)].m_fall_speed);
-                    }
-                    else
-                    {
-                        m_stage_qube [GetQubeNumber(x , i , y)].SetQubeStatus(m_stage_qube [GetQubeNumber(x , i + 1 , y)]);
-                    }
-                }
-
             }
         }
     }
@@ -272,10 +254,8 @@ bool Stage::Update()
 
 bool Stage::Draw()
 {
-    int qube_height = 0;
-
-    // 高さ10個分まで描画
-    for (int i = m_stage_bottom; i < 10 + m_stage_bottom; i++)
+    // 高さ5個分まで描画
+    for (int i = m_stage_bottom; i < 5 + m_stage_bottom; i++)
     {
         for (int y = 0; y < m_stage_width; y++)
         {
@@ -283,15 +263,10 @@ bool Stage::Draw()
             {
                 if (m_stage [i][y][x] > 0)
                 {
-                    m_stage_qube [GetQubeNumber(x , qube_height , y)].ColorUpdate(m_stage [i][y][x]);
-                    m_stage_qube [GetQubeNumber(x , qube_height , y)].Draw();
+                    m_stage_qube [GetQubeNumber(x , i , y)].ColorUpdate(m_stage [i][y][x]);
+                    m_stage_qube [GetQubeNumber(x , i , y)].Draw();
                 }
             }
-        }
-
-        if (qube_height < 10)
-        {
-            qube_height++;
         }
     }
 
@@ -380,6 +355,8 @@ ReturnUI Stage::ChangeColor(DirectX::XMFLOAT3 stage_player_pos)
 
     int stage_color_num {};
 
+    bool color_add_flg = false;
+
     if (m_stage_color_reset_flg)
     {
         for (int i = m_stage_bottom; i < m_max_hight; i++)
@@ -401,6 +378,7 @@ ReturnUI Stage::ChangeColor(DirectX::XMFLOAT3 stage_player_pos)
         m_stage_color_reset_flg = false;
         m_now_add_score = 10;
         m_next_add_score = 120;
+        color_add_flg = true;
     }
 
     if (m_stage [(int) stage_player_pos.y][(int) stage_player_pos.z][(int) stage_player_pos.x] == 1)
@@ -484,9 +462,13 @@ ReturnUI Stage::ChangeColor(DirectX::XMFLOAT3 stage_player_pos)
         }
     }
 
-    if (return_num.stage_score != 0 && return_num.stage_score != m_now_add_score)
+    if ((return_num.stage_score != 0 && return_num.stage_score != m_now_add_score) || color_add_flg)
     {
-        return_num.stage_score = m_now_add_score;
+        if (!color_add_flg)
+        {
+            return_num.stage_score = m_now_add_score;
+        }
+        return_num.rs.color [m_stage_color - 2] = 1;
     }
 
     return return_num;

@@ -19,7 +19,7 @@ void Custom::CustomLoad()
 
     for (int i = 0; i < 6; i++)
     {
-        m_choose_box [i].LoadTexture("assets/stage/ choose.png");
+        m_choose_box [i].LoadTexture("assets/stage/_choose.png");
     }
 
     m_go_play.LoadTexture("assets/UI/play.png");

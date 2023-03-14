@@ -69,7 +69,8 @@ public:
     void Finalize();
 
     // ステージの高さの情報をセット
-    void SetPlayerStageTop(int y , int x , int stage_top);
+    // 後付けでステージの一番下も取得する機能をつける
+    void SetPlayerStageTop(int y , int x , int stage_top , int stage_bottom);
     // ステージが登れるかどうかセット
     void SetClimbFlg(int y , int x , bool fall_flg);
 
@@ -100,6 +101,8 @@ public:
 
     bool m_player_crush_flg;                     // プレイヤーが潰されたかどうか
 
+    int m_player_stage_bottom;                 // ステージの一番下
+
 private:
     void UpdateLocalpose();				// ローカルポーズを更新する
     void CaliculateParentChildMtx();	// 親子関係を考慮した行列を作成
@@ -113,7 +116,5 @@ private:
 
     // プレイヤーの動く処理
     void MovePlayer(CharChipInt3 move_direction);
-
-    //int m_idx = 0;
 
 };
